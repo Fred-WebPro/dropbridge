@@ -249,7 +249,7 @@ export default function SellersPage() {
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#1E293B', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
                   itemStyle={{ color: '#fff' }}
-                  formatter={(value: number) => [`$${value.toFixed(0)}`, 'Growth']}
+                  formatter={(value: any) => [`$${Number(value).toFixed(0)}`, 'Growth']}
                 />
                 <Area type="monotone" dataKey="sellers2" stroke="#0EA5E9" strokeWidth={3} fillOpacity={1} fill="url(#colorSeller2)" activeDot={{ r: 6, strokeWidth: 0, fill: '#0EA5E9' }} />
                 <Area type="monotone" dataKey="sellers1" stroke="#8B5CF6" strokeWidth={3} fillOpacity={1} fill="url(#colorSeller1)" activeDot={{ r: 6, strokeWidth: 0, fill: '#8B5CF6' }} />

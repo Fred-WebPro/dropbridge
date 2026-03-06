@@ -2,12 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { TrendingUp, Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { TrendingUp, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabase"; // Подключаем Supabase
 
 export default function RegisterPage() {
+  const router = useRouter();
+  
+  // Состояния для видимости паролей
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Состояния для данных формы
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  
+  // Состояния для логики отправки
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Функция для расчета надежности пароля (от 0 до 5)
   const calculatePasswordStrength = (pass: string) => {
@@ -40,6 +55,48 @@ export default function RegisterPage() {
     return "Надежный пароль";
   };
 
+  // Функция обработки регистрации через Supabase
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Базовые проверки перед отправкой
+    if (password !== confirmPassword) {
+      setError("Пароли не совпадают");
+      return;
+    }
+    
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Отправляем данные в Supabase
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name, // Сохраняем имя
+          }
+        }
+      });
+
+      if (signUpError) throw signUpError;
+
+      // Если успешно
+      setSuccessMsg("Регистрация успешна! Перенаправляем...");
+      
+      // Переход на дашборд
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1500);
+
+    } catch (err: any) {
+      setError(err.message || "Что-то пошло не так при регистрации.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#080D1A] text-slate-900 dark:text-white transition-colors duration-300 relative overflow-hidden">
       
@@ -53,16 +110,31 @@ export default function RegisterPage() {
           {/* Логотип и Заголовок */}
           <div className="flex flex-col items-center gap-4 mb-8">
             <div className="flex items-center justify-center gap-2">
-              <div className="p-1.5 bg-white rounded-lg">
-                <TrendingUp className="w-6 h-6 text-slate-900" />
+              <div className="p-1.5 bg-white rounded-lg shadow-sm">
+                <TrendingUp className="w-6 h-6 text-blue-600" />
               </div>
               <span className="text-2xl font-bold tracking-tight">DropBridg</span>
             </div>
             <h1 className="text-2xl font-semibold text-slate-800 dark:text-white">Create Account</h1>
           </div>
 
+          {/* Блок ошибок */}
+          {error && (
+            <div className="w-full mb-4 p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl flex items-center gap-2 text-red-600 dark:text-red-400 text-sm">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <p>{error}</p>
+            </div>
+          )}
+
+          {/* Блок успеха */}
+          {successMsg && (
+            <div className="w-full mb-4 p-3 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-xl text-green-600 dark:text-green-400 text-sm font-medium text-center">
+              {successMsg}
+            </div>
+          )}
+
           {/* Форма */}
-          <form className="w-full space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <form className="w-full space-y-4" onSubmit={handleRegister}>
             
             {/* Full Name */}
             <div className="space-y-1.5">
@@ -71,6 +143,9 @@ export default function RegisterPage() {
               </label>
               <input
                 type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
                 className="w-full px-4 py-3 bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-[#1E293B] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl outline-none transition-all placeholder:text-slate-400 shadow-sm"
               />
@@ -83,6 +158,9 @@ export default function RegisterPage() {
               </label>
               <input
                 type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
                 className="w-full px-4 py-3 bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-[#1E293B] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl outline-none transition-all placeholder:text-slate-400 shadow-sm"
               />
@@ -96,10 +174,11 @@ export default function RegisterPage() {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  required
                   placeholder="Create a strong password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-[#1E293B] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl outline-none transition-all placeholder:text-slate-500 shadow-sm"
+                  className="w-full px-4 py-3 bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-[#1E293B] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl outline-none transition-all placeholder:text-slate-500 shadow-sm pr-12"
                 />
                 <button
                   type="button"
@@ -136,8 +215,11 @@ export default function RegisterPage() {
               <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Repeat your password"
-                  className="w-full px-4 py-3 bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-[#1E293B] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl outline-none transition-all placeholder:text-slate-500 shadow-sm"
+                  className="w-full px-4 py-3 bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-[#1E293B] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl outline-none transition-all placeholder:text-slate-500 shadow-sm pr-12"
                 />
                 <button
                   type="button"
@@ -154,6 +236,7 @@ export default function RegisterPage() {
               <input
                 type="checkbox"
                 id="terms"
+                required
                 className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#0F172A] cursor-pointer"
               />
               <label htmlFor="terms" className="text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
@@ -164,13 +247,20 @@ export default function RegisterPage() {
               </label>
             </div>
 
-            {/* Кнопка регистрации (заблокирована, если пароль слабый) */}
+            {/* Кнопка регистрации */}
             <button
               type="submit"
-              disabled={password.length > 0 && strengthScore < 5}
-              className="w-full py-3 mt-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors shadow-lg shadow-blue-500/25"
+              disabled={isLoading || (password.length > 0 && strengthScore < 5) || password !== confirmPassword}
+              className="w-full flex items-center justify-center gap-2 py-3 mt-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors shadow-lg shadow-blue-500/25"
             >
-              Sign Up
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" /> 
+                  Creating account...
+                </>
+              ) : (
+                "Sign Up"
+              )}
             </button>
           </form>
 
@@ -181,7 +271,7 @@ export default function RegisterPage() {
             <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
           </div>
 
-          {/* Социальные кнопки */}
+          {/* Социальные кнопки (Пока просто заглушки, подключим их к Supabase позже если нужно) */}
           <div className="w-full space-y-3">
             <button className="w-full flex items-center justify-center gap-2 py-2.5 bg-white dark:bg-white text-slate-800 hover:bg-slate-50 transition-colors rounded-xl text-sm font-medium shadow-sm">
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -201,7 +291,6 @@ export default function RegisterPage() {
             </button>
           </div>
 
-          {/* Ссылка на логин перенесена внутрь основного блока, чтобы избежать нахлестов */}
           <p className="mt-8 text-sm text-slate-600 dark:text-slate-400">
             Already have an account?{" "}
             <Link href="/login" className="text-blue-500 hover:text-blue-600 transition-colors font-medium">
@@ -211,7 +300,6 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Футер теперь в нормальном потоке документа */}
       <footer className="py-6 text-center text-sm text-slate-500 dark:text-slate-400 z-10">
         © {new Date().getFullYear()} DropBridg. All rights reserved.
       </footer>

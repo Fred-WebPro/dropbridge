@@ -209,7 +209,7 @@ export default function InsightsPage() {
                   <RechartsTooltip 
                     contentStyle={{ backgroundColor: '#1E293B', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
                     itemStyle={{ color: '#fff' }}
-                    formatter={(value: number) => [`$${value.toFixed(0)}`, 'Growth Volume']}
+                    formatter={(value: any) => [`$${Number(value).toFixed(0)}`, 'Growth Volume']}
                   />
                   <Area type="monotone" dataKey="value" stroke="#0EA5E9" strokeWidth={3} fillOpacity={1} fill="url(#colorGrowth)" activeDot={{ r: 6, strokeWidth: 0, fill: '#0EA5E9' }} />
                 </AreaChart>
@@ -274,7 +274,7 @@ export default function InsightsPage() {
                   <RechartsTooltip 
                     contentStyle={{ backgroundColor: '#1E293B', borderColor: '#334155', borderRadius: '8px', color: '#fff', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                     itemStyle={{ color: '#fff', fontWeight: 600 }}
-                    formatter={(value: number) => [`${value}%`, 'Market Share']}
+                    formatter={(value: any) => [`${value}%`, 'Market Share']}
                   />
                 </PieChart>
               </ResponsiveContainer>

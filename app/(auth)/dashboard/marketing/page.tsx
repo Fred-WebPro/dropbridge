@@ -214,7 +214,7 @@ export default function MarketingPage() {
               <Tooltip 
                 contentStyle={{ backgroundColor: '#1E293B', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
                 itemStyle={{ color: '#fff' }}
-                formatter={(value: number, name: string) => [`$${value.toFixed(0)}`, name.charAt(0).toUpperCase() + name.slice(1)]}
+                formatter={(value: any, name: any) => [`$${Number(value).toFixed(0)}`, name.charAt(0).toUpperCase() + name.slice(1)]}
               />
               <Area type="monotone" dataKey="spend" stroke="#8B5CF6" strokeWidth={3} fillOpacity={1} fill="url(#colorSpend)" activeDot={{ r: 6, strokeWidth: 0, fill: '#8B5CF6' }} />
               <Area type="monotone" dataKey="revenue" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" activeDot={{ r: 6, strokeWidth: 0, fill: '#10B981' }} />

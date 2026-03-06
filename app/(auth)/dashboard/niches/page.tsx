@@ -252,7 +252,7 @@ export default function NichesPage() {
               <Tooltip 
                 contentStyle={{ backgroundColor: '#1E293B', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
                 itemStyle={{ color: '#fff' }}
-                formatter={(value: number) => [`$${value.toFixed(0)}`, 'Revenue']}
+                formatter={(value: any) => [`$${Number(value).toFixed(0)}`, 'Revenue']}
               />
               <Area type="monotone" dataKey="revenue2" stroke="#0EA5E9" strokeWidth={3} fillOpacity={1} fill="url(#colorRev2)" activeDot={{ r: 6, strokeWidth: 0, fill: '#0EA5E9' }} />
               <Area type="monotone" dataKey="revenue1" stroke="#8B5CF6" strokeWidth={3} fillOpacity={1} fill="url(#colorRev1)" activeDot={{ r: 6, strokeWidth: 0, fill: '#8B5CF6' }} />
